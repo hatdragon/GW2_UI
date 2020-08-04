@@ -647,8 +647,10 @@ local function updateMultiBar(lm, barName, buttonName, actionPage, state)
         RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR4_TEXT, barName, "VerticalActionBarDummy")
     elseif barName == "MultiBarBottomLeft" then
         lm:RegisterMultiBarLeft(fmMultibar)
+        RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR1_TEXT, barName, "VerticalActionBarDummy", nil, true, true)
     elseif barName == "MultiBarBottomRight" then
         lm:RegisterMultiBarRight(fmMultibar)
+        RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR2_TEXT, barName, "VerticalActionBarDummy", nil, true, true)
     end
     
     return fmMultibar
@@ -1085,7 +1087,6 @@ local function LoadActionBars(lm)
     UIPARENT_MANAGED_FRAME_POSITIONS["ExtraActionBarFrame"] = nil
     UIPARENT_MANAGED_FRAME_POSITIONS["ZoneAbilityFrame"] = nil
     UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
-    UIPARENT_MANAGED_FRAME_POSITIONS["TalkingHeadFrame"] = nil
 
     if not IsFrameModified("ExtraActionBarFrame") then
         GW.Debug("moving ExtraActionBarFrame")

@@ -21,6 +21,7 @@
     <Script file="immersive\skins\dressUpFrame.lua"/>
     <Script file="immersive\skins\inspectFrame.lua"/>
     <Script file="immersive\skins\helpFrame.lua"/>
+    <Script file="immersive\skins\guild.lua"/>
     
     <Script file="immersive\skins\addons\immersion.lua"/>
 </Ui>

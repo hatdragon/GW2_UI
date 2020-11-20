@@ -189,15 +189,9 @@ local function GWUseThisLocalization()
     L["FADE_MICROMENU"] = "Fade Menu Bar"
     L["FADE_MICROMENU_DESC"] = "Fade the main micromenu when the mouse is not near."
     L["TALENTS_BUTTON_DESC"] = "Enable the talents, specialization, and spellbook replacement."
-    L["ALL_BINDINGS_SAVE"] = "All key bindings have been saved."
-    L["ALL_BINDINGS_DISCARD"] = "All newly set key bindings have been discarded."
-    L["BINDINGS_DESC"] = "Hover your mouse over any actionbutton to bind it. Press the escape key or right click to clear the current actionbutton's keybinding."
-    L["BINDINGS_TRIGGER"] = "Trigger"
-    L["BINGSINGS_KEY"] = "Key"
-    L["BINGSINGS_CLEAR"] = "All key bindings cleared for"
-    L["BINGSINGS_BIND"] = "bound to"
-    L["MINIMAP_POS"] = "Minimap position"
     L["MINIMAP_COORDS"] = "좌표"
+    L["MINIMAP_COORDS_TOGGLE"] = "Show Coordinates on Minimap"
+    L["WORLDMAP_COORDS_TOGGLE"] = "Show Coordinates on world map"
     L["WORLD_MARKER_DESC"] = "Show menu for placing world markers when in raids."
     L["UP"] = "위"
     L["DOWN"] = "아래"
@@ -346,6 +340,7 @@ local function GWUseThisLocalization()
     L["GW_COMBAT_TEXT_COMMA_FORMAT"] = ": Show numbers with commas"
     L["PLAYER_DODGEBAR_SPELL"] = "Dodgebar spell"
     L["PLAYER_DODGEBAR_SPELL_DESC"] = "Enter the spell id which should be tracker on the dodgebar.\nIf no id is entered, the default spells, based on your spec and talents are tracked."
+    L["COPY_OF"] = "Copy of"
 end
 
 if GetLocale() == "koKR" then

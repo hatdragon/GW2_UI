@@ -101,7 +101,7 @@ local function lfgAnim(self, elapse)
     end
     QueueStatusMinimapButton.animationCircle:Show()
 
-    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/LFDMicroButton-Down")
+    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/icons/LFDMicroButton-Down")
 
     local speed = 1.5
     local rot = QueueStatusMinimapButton.animationCircle.background:GetRotation() + (speed * elapse)
@@ -112,7 +112,7 @@ end
 GW.AddForProfiling("map", "lfgAnim", lfgAnim)
 
 local function lfgAnimStop()
-    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/LFDMicroButton-Down")
+    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/icons/LFDMicroButton-Down")
     QueueStatusMinimapButton.animationCircle:Hide()
     QueueStatusMinimapButtonIconTexture:SetTexCoord(unpack(GW.TexCoords))
 end
@@ -445,7 +445,7 @@ local function LoadMinimap()
     hooksecurefunc("EyeTemplate_StopAnimating", lfgAnimStop)
 
     QueueStatusMinimapButtonIconTexture:SetSize(20, 20)
-    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/LFDMicroButton-Down")
+    QueueStatusMinimapButtonIconTexture:SetTexture("Interface/AddOns/GW2_UI/textures/icons/LFDMicroButton-Down")
     QueueStatusMinimapButtonIcon:SetSize(20, 20)
     QueueStatusMinimapButton.animationCircle =
         CreateFrame("Frame", "GwLFDAnimation", QueueStatusMinimapButton, "GwLFDAnimation")
@@ -491,18 +491,23 @@ local function LoadMinimap()
     GwMapTime:SetScript("OnEnter", time_OnEnter)
     GwMapTime:SetScript("OnLeave", GameTooltip_Hide)
 
-    GwMapCoords = CreateFrame("Button", "GwMapCoords", Minimap, "GwMapCoords")
-    GwMapCoords.Coords:SetText("n/a")
-    GwMapCoords.Coords:SetFont(STANDARD_TEXT_FONT, 12)
-    GwMapCoords.MapCoordsMiniMapPrecision = GetSetting("MINIMAP_COORDS_PRECISION")
-    GwMapCoords:SetScript("OnEnter", MapCoordsMiniMap_OnEnter)
-    GwMapCoords:SetScript("OnClick", MapCoordsMiniMap_OnClick)
-    GwMapCoords:SetScript("OnLeave", GameTooltip_Hide)
-    -- only set the coords updater here if they are showen always
-    local hoverSetting = GetSetting("MINIMAP_HOVER")
-    if hoverSetting == "COORDS" or hoverSetting == "CLOCKCOORDS" or hoverSetting == "ZONECOORDS" or hoverSetting == "ALL" then
-        GwMapCoords.CoordsTimer = C_Timer.NewTicker(0.1, function() mapCoordsMiniMap_setCoords(GwMapCoords) end)
+    --coords
+    if GetSetting("MINIMAP_COORDS_TOGGLE") then
+        GwMapCoords = CreateFrame("Button", "GwMapCoords", Minimap, "GwMapCoords")
+        GwMapCoords.Coords:SetText("n/a")
+        GwMapCoords.Coords:SetFont(STANDARD_TEXT_FONT, 12)
+        GwMapCoords.MapCoordsMiniMapPrecision = GetSetting("MINIMAP_COORDS_PRECISION")
+        GwMapCoords:SetScript("OnEnter", MapCoordsMiniMap_OnEnter)
+        GwMapCoords:SetScript("OnClick", MapCoordsMiniMap_OnClick)
+        GwMapCoords:SetScript("OnLeave", GameTooltip_Hide)
+   
+        -- only set the coords updater here if they are showen always
+        local hoverSetting = GetSetting("MINIMAP_HOVER")
+        if hoverSetting == "COORDS" or hoverSetting == "CLOCKCOORDS" or hoverSetting == "ZONECOORDS" or hoverSetting == "ALL" then
+            GwMapCoords.CoordsTimer = C_Timer.NewTicker(0.1, function() mapCoordsMiniMap_setCoords(GwMapCoords) end)
+        end
     end
+
     --FPS
     if GetSetting("MINIMAP_FPS") then
         GwMapFPS = CreateFrame("Button", "GwMapFPS", Minimap, "GwMapFPS")

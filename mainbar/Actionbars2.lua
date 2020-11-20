@@ -375,9 +375,9 @@ local function setActionButtonStyle(buttonName, noBackDrop, hideUnused, isStance
         btn.SpellHighlightTexture:SetSize(btn:GetWidth(), btn:GetWidth())
     end
 
-    btn:SetPushedTexture("Interface\\AddOns\\GW2_UI\\textures\\actionbutton-pressed")
-    btn:SetHighlightTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Quickslot-Depress")
-    btn:SetCheckedTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Quickslot-Depress")
+    btn:SetPushedTexture("Interface/AddOns/GW2_UI/textures/uistuff/actionbutton-pressed")
+    btn:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Quickslot-Depress")
+    btn:SetCheckedTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Quickslot-Depress")
     btn.Name:SetAlpha(0) --Hide Marco Name on Actionbutton
 
     if noBackDrop == nil or noBackDrop == false then
@@ -634,9 +634,9 @@ local function updateMultiBar(lm, barName, buttonName, actionPage, state)
     fmMultibar:SetSize(used_width, used_height)
 
     if barName == "MultiBarLeft" then
-        RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR3_TEXT, barName, "VerticalActionBarDummy", nil, nil, nil, {"scaleable"})
-    elseif barName == "MultiBarRight" then
         RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR4_TEXT, barName, "VerticalActionBarDummy", nil, nil, nil, {"scaleable"})
+    elseif barName == "MultiBarRight" then
+        RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR3_TEXT, barName, "VerticalActionBarDummy", nil, nil, nil, {"scaleable"})
     elseif barName == "MultiBarBottomLeft" then
         lm:RegisterMultiBarLeft(fmMultibar)
         RegisterMovableFrame(fmMultibar, SHOW_MULTIBAR1_TEXT, barName, "VerticalActionBarDummy", nil, nil, true, {"scaleable"}, true)
@@ -1021,15 +1021,15 @@ local function changeFlyoutStyle(self)
     
     self.FlyoutBorder:Hide()
     self.FlyoutBorderShadow:Hide()
-    SpellFlyoutHorizontalBackground:SetTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Tooltip-Background")
-    SpellFlyoutVerticalBackground:SetTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Tooltip-Background")
-    SpellFlyoutBackgroundEnd:SetTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Tooltip-Background")
+    SpellFlyoutHorizontalBackground:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Tooltip-Background")
+    SpellFlyoutVerticalBackground:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Tooltip-Background")
+    SpellFlyoutBackgroundEnd:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Tooltip-Background")
 
     local i = 1
     local btn = _G["SpellFlyoutButton1"]
     while btn do
-        btn:SetPushedTexture("Interface\\AddOns\\GW2_UI\\textures\\actionbutton-pressed")
-        btn:SetHighlightTexture("Interface\\AddOns\\GW2_UI\\textures\\UI-Quickslot-Depress")
+        btn:SetPushedTexture("Interface/AddOns/GW2_UI/textures/uistuff/actionbutton-pressed")
+        btn:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/UI-Quickslot-Depress")
         i = i + 1
         btn = _G["SpellFlyoutButton" .. i]
     end

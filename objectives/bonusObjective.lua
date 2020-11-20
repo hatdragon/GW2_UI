@@ -150,7 +150,7 @@ local function createNewBonusObjectiveBlock(blockIndex)
     newBlock.Header:SetTextColor(newBlock.color.r, newBlock.color.g, newBlock.color.b)
     newBlock.hover:SetVertexColor(newBlock.color.r, newBlock.color.g, newBlock.color.b)
 
-    newBlock.joingroup:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/LFDMicroButton-Down")
+    newBlock.joingroup:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/icons/LFDMicroButton-Down")
     newBlock.joingroup:SetScript(
         "OnClick",
         function (self)
@@ -176,12 +176,11 @@ local function createNewBonusObjectiveBlock(blockIndex)
 end
 
 local foundEvent = false
-local savedHeight = 1
 local shownBlocks = 0
 local blockIndex = 1
 
 local function setUpBlock(questIDs)
-    local savedHeight = 0
+    local savedContainerHeight = 20
 
     for k, v in pairs(questIDs) do
         local questID = v.ID
@@ -216,9 +215,6 @@ local function setUpBlock(questIDs)
             shownBlocks = shownBlocks + 1
             GwBonusObjectiveBlock.height = 20
             GwBonusObjectiveBlock.numObjectives = 0
-            if blockIndex == 1 then
-                savedHeight = 20
-            end
             
             GwBonusObjectiveBlock.Header:SetText(text)
 
@@ -291,7 +287,7 @@ local function setUpBlock(questIDs)
                 AddTrackerNotification(compassData)
             end
 
-            savedHeight = savedHeight + GwBonusObjectiveBlock.height
+            savedContainerHeight = savedContainerHeight + GwBonusObjectiveBlock.height + 10
 
             if not GwQuesttrackerContainerBonusObjectives.collapsed then
                 --add groupfinder button
@@ -312,8 +308,7 @@ local function setUpBlock(questIDs)
             blockIndex = blockIndex + 1
         end
     end
-
-    GwQuesttrackerContainerBonusObjectives:SetHeight(savedHeight)
+    GwQuesttrackerContainerBonusObjectives:SetHeight(savedContainerHeight)
 end
 
 local function updateBonusObjective(self, event)
@@ -327,7 +322,6 @@ local function updateBonusObjective(self, event)
     local EventToShow = false
 
     foundEvent = false
-    savedHeight = 1
     shownBlocks = 0
     blockIndex = 1
     trackedEventIDs = {}
@@ -352,12 +346,11 @@ local function updateBonusObjective(self, event)
         end
     end
 
-    if GwQuesttrackerContainerBonusObjectives.collapsed == true then
+    if GwQuesttrackerContainerBonusObjectives.collapsed then
         if EventToShow then
             GwBonusHeader:Show()
             foundEvent = true
             trackedEventIDs = {}
-            savedHeight = 20
         else
             foundEvent = false
             GwQuesttrackerContainerBonusObjectives.collapsed = false
@@ -365,8 +358,7 @@ local function updateBonusObjective(self, event)
     end
 
     setUpBlock(trackedEventIDs)
-
-    if foundEvent == false then
+    if not foundEvent then
         savedQuests = {}
         GwBonusHeader:Hide()
         for i = 1, 20 do

@@ -1,91 +1,217 @@
 local _, GW = ...
 local L = GW.L
+
 local constBackdropFrame = GW.skins.constBackdropFrame
 local SetSetting = GW.SetSetting
 local GetSetting = GW.GetSetting
 
+-- local COMMUNITIES_FRAME_EVENTS = {
+--     "ADDON_LOADED",
+-- 	"CLUB_STREAMS_LOADED",
+-- 	"CLUB_STREAM_ADDED",
+-- 	"CLUB_STREAM_REMOVED",
+-- 	"CLUB_ADDED",
+-- 	"CLUB_REMOVED",
+-- 	"CLUB_UPDATED",
+-- 	"CLUB_SELF_MEMBER_ROLE_UPDATED",
+-- 	"STREAM_VIEW_MARKER_UPDATED",
+-- 	"BN_DISCONNECTED",
+-- 	"PLAYER_GUILD_UPDATE",
+-- 	"CHANNEL_UI_UPDATE",
+-- 	"UPDATE_CHAT_COLOR",
+-- 	"GUILD_RENAME_REQUIRED",
+-- 	"REQUIRED_GUILD_RENAME_RESULT",
+-- 	"CLUB_FINDER_RECRUITMENT_POST_RETURNED",
+-- 	"CLUB_FINDER_ENABLED_OR_DISABLED",
+-- };
+
+-- local CLUB_FINDER_APPLICANT_LIST_EVENTS = {
+-- 	"GUILD_ROSTER_UPDATE",
+-- 	"CLUB_FINDER_RECRUITS_UPDATED",
+-- };
+
 -- get local references
-local eventFrame =  CreateFrame("FRAME");
+-- local eventFrame =  CreateFrame("FRAME");
 
+local communitiesFrame
 
-local GuildFrame = nil
+local newWidth = 930
+local newHeight = 640
 
-function GuildFrame_OnEvent(self, event, ...)
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r " + event)
-end
+local function ConfigureMover()
+    -- movable stuff
+    local pos = GetSetting("COMMUNITYFRAME_POSITION")
+    communitiesFrame.mover = CreateFrame("Frame", nil, communitiesFrame)
+    communitiesFrame.mover:EnableMouse(true)
+    communitiesFrame:SetMovable(true)
+    communitiesFrame.mover:SetSize(newWidth, 30)
+    communitiesFrame.mover:SetPoint("BOTTOMLEFT", communitiesFrame, "TOPLEFT", 0, 0)
+    communitiesFrame.mover:SetPoint("BOTTOMRIGHT", communitiesFrame, "TOPRIGHT", 0, 0)
+    communitiesFrame.mover:RegisterForDrag("LeftButton")
+    communitiesFrame.mover.onMoveSetting = "COMMUNITYFRAME_POSITION"
+    communitiesFrame:SetClampedToScreen(true)
+    communitiesFrame.mover:SetScript("OnDragStart", function(self)
+        self:GetParent():StartMoving()
+    end)
+    communitiesFrame.mover:SetScript("OnDragStop", function(self)
+        local self = self:GetParent()
 
-local function ClearMailTextures()
-    _G.CommunitiesFrameBg:Hide()
-    _G.CommunitiesFrameInset.NineSlice:Hide()
-    _G.CommunitiesFrameInset:CreateBackdrop(constBackdropFrameBorder)
+        self:StopMovingOrSizing()
 
-    CommunitiesFrame:StripTextures()
-    CommunitiesFrame.NineSlice:Hide()
-    CommunitiesFrame.TitleBg:Hide()
-    CommunitiesFrame.TopTileStreaks:Hide()
-    CommunitiesFrame:CreateBackdrop()
+        local x = self:GetLeft()
+        local y = self:GetTop()
 
-end
-
-local function RegisterEvents()
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r Registering Events for Guild frames " )
-
-    eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE");
-    eventFrame:RegisterEvent("PLAYER_GUILD_UPDATE");
-    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-    eventFrame:RegisterEvent("UPDATE_FACTION");
-    eventFrame:RegisterEvent("GUILD_RENAME_REQUIRED");
-    eventFrame:RegisterEvent("REQUIRED_GUILD_RENAME_RESULT");
-    eventFrame:RegisterEvent("GUILD_MOTD");
-    eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE");
-    eventFrame:RegisterEvent("GUILD_RANKS_UPDATE");
-    eventFrame:RegisterEvent("PLAYER_GUILD_UPDATE");
-    eventFrame:RegisterEvent("LF_GUILD_POST_UPDATED");
-    eventFrame:RegisterEvent("LF_GUILD_RECRUITS_UPDATED");
-    eventFrame:RegisterEvent("LF_GUILD_RECRUIT_LIST_CHANGED");
-    eventFrame:RegisterEvent("GUILD_CHALLENGE_UPDATED");
-    eventFrame:RegisterEvent("GUILD_NEWS_UPDATE");
-    eventFrame:RegisterEvent("GUILD_REWARDS_LIST");
-    eventFrame:RegisterEvent("GUILD_TRADESKILL_UPDATE");
-    eventFrame:RegisterEvent("GUILD_RECIPE_KNOWN_BY_MEMBERS");
-    eventFrame:SetScript("OnEvent", GuildFrame_OnEvent)
-
-end
-
-local function SkinGuildFrames()
-
-    RegisterEvents()
-
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r loading guild frames " )
-
-    if IsInGuild() and CanShowAchievementUI() then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r This should tell us if we can see the thing..." )
-    end
-    
-    --have to force load the CommunitiesFrame first 
-    if (not CommunitiesFrame) then
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r loading communities frames " )
-        Communities_LoadUI();
-        if not CommunitiesFrame:IsShown() then
-            --ShowUIPanel(CommunitiesFrame);
-            CommunitiesFrame:Show()
-		end
-    end
-    --also need guild achieves
-    if ( not AchievementFrame ) then
+        -- re-anchor to UIParent after the move
+        self.SetPoint = nil -- Make SetPoint accessable
+        self:ClearAllPoints()
+        self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y)
+        self.SetPoint = GW.NoOp -- Prevent Blizzard to reanchor that frame
         
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r loading achievements frames " )
-        AchievementFrame_LoadUI();
+        -- store the updated position
+        if self.mover.onMoveSetting then
+            local pos = GetSetting(self.mover.onMoveSetting)
+            if pos then
+                wipe(pos)
+            else
+                pos = {}
+            end
+            pos.point = "TOPLEFT"
+            pos.relativePoint = "BOTTOMLEFT"
+            pos.xOfs = x
+            pos.yOfs = y
+            SetSetting(self.mover.onMoveSetting, pos)
+        end
+    end)
+    communitiesFrame:SetPoint(pos.point, UIParent, pos.relativePoint, pos.xOfs, pos.yOfs)
+    communitiesFrame.SetPoint = GW.NoOp -- Prevent Blizzard to reanchor that frame
+   
+end
+
+local function SkinMOTDArea()
+    communitiesFrame.MOTDheading = communitiesFrame:CreateTexture("bg", "BACKGROUND")
+    communitiesFrame.MOTDheading:SetSize(newWidth-325, 42)
+    communitiesFrame.MOTDheading:SetPoint("BOTTOMLEFT", communitiesFrame, "TOPLEFT", 150, -150)
+    communitiesFrame.MOTDheading:SetTexture("Interface/AddOns/GW2_UI/textures/bag/bagheader")
+
+    communitiesFrame.MOTDheading.Title = communitiesFrame:CreateFontString("communitiesFrameTitle", "ARTWORK")
+    communitiesFrame.MOTDheading.Title:SetPoint("TOPLEFT", communitiesFrame.MOTDheading, "TOPLEFT", 50, -20)
+    communitiesFrame.MOTDheading.Title:SetFont(DAMAGE_TEXT_FONT, 14)
+    communitiesFrame.MOTDheading.Title:SetText(GUILD_MOTD_LABEL)
+    communitiesFrame.MOTDheading.Title:SetTextColor(1, .93, .73)
+
+    CommunitiesFrameGuildDetailsFrameInfo.EditMOTDButton:SkinButton()
+    -- local newMOTDEditButton = CreateFrame("BUTTON", communitiesFrame)
+    -- newMOTDEditButton:SetSize(CommunitiesFrameGuildDetailsFrameInfo.EditMOTDButton:GetSize())
+    -- newMOTDEditButton:SetPoint("TOPLEFT", communitiesFrame.MOTDheading, "TOPLEFT", 50, -20)
+    -- newMOTDEditButton:SetText(EDIT)
+    -- newMOTDEditButton:SetPoint("CENTER", communitiesFrame.MOTDheading.Title, "TOPLEFT", 50, 0)
+
+    -- communitiesFrame.newMOTDEditButton = newMOTDEditButton
+    -- communitiesFrame.newMOTDEditButton:SkinButton()
+
+end
+
+local function SkinCommunitiesFrame()
+    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r Reskinning Communities Frame ")
+    communitiesFrame = _G.CommunitiesFrame
+    communitiesFrame:StripTextures()
+
+    communitiesFrame:SetSize(newWidth, newHeight)
+    -- Configure Frame Background
+    communitiesFrame.CommunitiesFrameBgTexture = communitiesFrame:CreateTexture("communitiesFrameBgTexture",
+                                                     "BACKGROUND")
+    communitiesFrame.CommunitiesFrameBgTexture:SetSize(newWidth, newHeight)
+    communitiesFrame.CommunitiesFrameBgTexture:SetPoint("TOPLEFT", communitiesFrame, "TOPLEFT", 0, 5)
+    communitiesFrame.CommunitiesFrameBgTexture:SetTexture(
+        "Interface/AddOns/GW2_UI/textures/hud/mailboxwindow-background")
+    communitiesFrame.CommunitiesFrameBgTexture:SetTexCoord(0, 0.7099, 0, 0.955);
+
+    -- Configure Heading
+    communitiesFrame.heading = communitiesFrame:CreateTexture("bg", "BACKGROUND")
+    communitiesFrame.heading:SetSize(newWidth, 64)
+    communitiesFrame.heading:SetPoint("BOTTOMLEFT", communitiesFrame, "TOPLEFT", 0, 0)
+    communitiesFrame.heading:SetTexture("Interface/AddOns/GW2_UI/textures/bag/bagheader")
+
+    communitiesFrame.heading.Title = communitiesFrame:CreateFontString("communitiesFrameTitle", "ARTWORK")
+    communitiesFrame.heading.Title:SetPoint("TOPLEFT", communitiesFrame, "TOPLEFT", 25, 30)
+    communitiesFrame.heading.Title:SetFont(DAMAGE_TEXT_FONT, 20)
+    communitiesFrame.heading.Title:SetText(GUILD_AND_COMMUNITIES)
+    communitiesFrame.heading.Title:SetTextColor(1, .93, .73)
+
+    communitiesFrame.icon = communitiesFrame:CreateTexture("communitiesFrameIcon", "ARTWORK")
+    communitiesFrame.icon:SetSize(80, 80)
+    communitiesFrame.icon:SetPoint("CENTER", communitiesFrame, "TOPLEFT", -20, 25)
+    communitiesFrame.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/garrison-up")
+
+    communitiesFrame.headingRight = communitiesFrame:CreateTexture("bg", "BACKGROUND")
+    communitiesFrame.headingRight:SetSize(newWidth, 64)
+    communitiesFrame.headingRight:SetPoint("BOTTOMRIGHT", communitiesFrame, "TOPRIGHT", 0, 0)
+    communitiesFrame.headingRight:SetTexture("Interface/AddOns/GW2_UI/textures/bag/bagheader-right")
+
+    communitiesFrame.MaximizeMinimizeFrame:Kill() -- we don't want the small frame view
+
+    communitiesFrame.CloseButton:SkinButton(true, false)
+    communitiesFrame.CloseButton:SetSize(20, 20)
+    communitiesFrame.CloseButton:ClearAllPoints()
+    communitiesFrame.CloseButton:SetPoint("TOPRIGHT", communitiesFrame, "TOPRIGHT", -10, 30)
+    communitiesFrame.CloseButton:SetParent(communitiesFrame)
+
+    -- Configure footer
+    communitiesFrame.footer = communitiesFrame:CreateTexture("bg", "BACKGROUND")
+    communitiesFrame.footer:SetSize(newWidth, 70)
+    communitiesFrame.footer:SetPoint("TOPLEFT", communitiesFrame, "BOTTOMLEFT", 0, 5)
+    communitiesFrame.footer:SetPoint("TOPRIGHT", communitiesFrame, "BOTTOMRIGHT", 0, 5)
+    communitiesFrame.footer:SetTexture("Interface/AddOns/GW2_UI/textures/bag/bagfooter")
+
+    communitiesFrame.TitleBg:Hide()
+    communitiesFrame.TitleText:SetTextColor(1, .93, .73)
+
+    communitiesFrame.ChatTab:SetPoint("TOPLEFT", communitiesFrame, "TOPLEFT", -40, -25)
+
+
+
+    SkinMOTDArea()
+
+    
+
+    ConfigureMover()
+
+end
+
+
+-- local function RegisterEvents()
+--     DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r Registering Events for Guild frames " )
+--     FrameUtil.RegisterFrameForEvents(eventFrame, COMMUNITIES_FRAME_EVENTS)
+--     FrameUtil.RegisterFrameForEvents(eventFrame, CLUB_FINDER_APPLICANT_LIST_EVENTS)
+--     eventFrame:SetScript("OnEvent", guildUI_OnEvent)
+-- end
+
+local hooked = false
+
+local function doneHookedMin()
+    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r HOOKED MIN")
+end
+
+local function doneHookedMax()
+    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r HOOKED MAX")
+end
+
+function GW:SkinGuildFrames()
+    -- load communities up
+    if not IsAddOnLoaded("Blizzard_Communities") then
+        Communities_LoadUI()
     end
 
-    -- GuildFrame = _G.CommunitiesFrame
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r Hooked=" .. tostring(hooked) )
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r CommunitiesLoaded=" .. tostring(IsAddOnLoaded("Blizzard_Communities")) )
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r CommunitiesFrameAvailable=" .. tostring(_G.CommunitiesFrame~=nil) )
 
-    local newWidth, newHeight = _G.CommunitiesFrame:GetSize()
-    newWidth = (newWidth * 2.0) + 50
-    newHeight = newHeight + 30
-    _G.CommunitiesFrame:SetSize(newWidth, newHeight)
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r finished loading guild frames " )
+    if not hooked and IsAddOnLoaded("Blizzard_Communities") and _G.CommunitiesFrame then
+        _G.CommunitiesFrame:HookScript("OnShow", SkinCommunitiesFrame)
+        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Minimize", doneHookedMin)
+        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Maximize", doneHookedMax)
+        hooked = true
+    end
 end
-GW.SkinGuildFrames = SkinGuildFrames
+GW:SkinGuildFrames()
 
-SkinGuildFrames()

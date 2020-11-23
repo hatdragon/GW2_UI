@@ -1140,6 +1140,7 @@ local function tracker_OnEvent(self, event, ...)
                 end
             else
                 if AUTO_QUEST_WATCH == "1" and C_QuestLog.GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
+                    C_QuestLog.AddQuestWatch(questID, Enum.QuestWatchType.Automatic)
                     updateQuestLogLayoutSingle(self, questID)
                 end
             end
@@ -1239,10 +1240,10 @@ local function LoadQuestTracker()
             ObjectiveTrackerFrame:Hide()
         end
     )
-    -- don't do this til new tracker
+
     --ObjectiveTrackerFrame:UnregisterAllEvents()
-    --ObjectiveTrackerFrame:SetScript("OnUpdate", nil)
-    --ObjectiveTrackerFrame:SetScript("OnSizeChanged", nil)
+    ObjectiveTrackerFrame:SetScript("OnUpdate", nil)
+    ObjectiveTrackerFrame:SetScript("OnSizeChanged", nil)
     --ObjectiveTrackerFrame:SetScript("OnEvent", nil)
 
     -- create our tracker

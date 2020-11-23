@@ -81,6 +81,11 @@ local UNSTYLED = {
 local LEVEL1 = strlower(_G.TOOLTIP_UNIT_LEVEL:gsub("%s?%%s%s?%-?", ""))
 local LEVEL2 = strlower(_G.TOOLTIP_UNIT_LEVEL_CLASS:gsub("^%%2$s%s?(.-)%s?%%1$s", "%1"):gsub("^%-?г?о?%s?", ""):gsub("%s?%%s%s?%-?", ""))
 
+local function IsModKeyDown()
+	local k = GetSetting("ADVANCED_TOOLTIP_ID_MODIFIER")
+	return k == "ALWAYS" or ((k == "SHIFT" and IsShiftKeyDown()) or (k == "CTRL" and IsControlKeyDown()) or (k == "ALT" and IsAltKeyDown()))
+end
+
 local function movePlacement(self)
     local settings = GetSetting("GameTooltipPos")
     self:ClearAllPoints()
@@ -485,8 +490,7 @@ local function GameTooltip_OnTooltipSetUnit(self)
     end
 
     -- NPC ID's
-    local npcID = GetSetting("ADVANCED_TOOLTIP_NPC_ID")
-    if unit and npcID and not isPlayerUnit then
+    if unit and IsModKeyDown() and not isPlayerUnit then
         if C_PetBattles.IsInBattle() then return end
         local guid = UnitGUID(unit) or ""
         local id = tonumber(strmatch(guid, "%-(%d-)%-%x-$"), 10)
@@ -510,9 +514,8 @@ local function GameTooltip_OnTooltipSetItem(self)
         local numall = GetItemCount(link, true)
         local left, right, bankCount = " ", " ", " "
         local itemCountOption = GetSetting("ADVANCED_TOOLTIP_OPTION_ITEMCOUNT")
-        local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
 
-        if link ~= nil and showSpellID then
+        if link ~= nil and IsModKeyDown() then
             right = format("|cffffedba%s|r %s", ID, strmatch(link, ":(%w+)"))
         end
 
@@ -540,21 +543,21 @@ end
 local function GameTooltip_OnTooltipSetSpell(self)
     if self:IsForbidden() then return end
     local id = select(2, self:GetSpell())
-    local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
-    if not id or not showSpellID then return end
+    if id and IsModKeyDown() then
 
-    local displayString = format("|cffffedba%s|r %d", ID, id)
+        local displayString = format("|cffffedba%s|r %d", ID, id)
 
-    for i = 1, self:NumLines() do
-        local line = _G[format("GameTooltipTextLeft%d", i)]
-        local text = line and line.GetText and line:GetText()
-        if text and strfind(text, displayString) then
-            return
+        for i = 1, self:NumLines() do
+            local line = _G[format("GameTooltipTextLeft%d", i)]
+            local text = line and line.GetText and line:GetText()
+            if text and strfind(text, displayString) then
+                return
+            end
         end
-    end
 
-    self:AddLine(displayString)
-    self:Show()
+        self:AddLine(displayString)
+        self:Show()
+    end
 end
 
 local function SetUnitAuraData(self, id, caster)
@@ -565,10 +568,9 @@ local function SetUnitAuraData(self, id, caster)
             self:AddLine(sourceText, 1, 1, 1)
         end
 
-        local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
         local showClassColor = GetSetting("ADVANCED_TOOLTIP_SHOW_CLASS_COLOR")
 
-        if showSpellID then
+        if IsModKeyDown() then
             if caster then
                 local name = UnitName(caster)
                 local _, class = UnitClass(caster)
@@ -599,52 +601,74 @@ end
 
 local function SetToyByItemID(self, id)
     if self:IsForbidden() then return end
-    local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
 
-    if not id or not showSpellID then return end
-
-    self:AddLine(format("|cffffedba%s|r %d", ID, id))
-    self:Show()
-end
-
-local function SetCurrencyToken(self, idx)
-    if self:IsForbidden() then return end
-    local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
-
-    if not idx or not showSpellID then return end
-
-    local id = tonumber(strmatch(C_CurrencyInfo.GetCurrencyListLink(idx),"currency:(%d+)"))
-    self:AddLine(format("|cffffedba%s|r %d", ID, id))
-	self:Show()
-end
-
-local function SetCurrencyTokenByID(self, id)
-    if self:IsForbidden() then return end
-    local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
-
-    if not id or not showSpellID then return end
-
-    self:AddLine(format("|cffffedba%s|r %d", ID, id))
-	self:Show()
-end
-
-local function SetBackpackToken(self, id)
-    if self:IsForbidden() then return end
-    local showSpellID = GetSetting("ADVANCED_TOOLTIP_SPELL_ITEM_ID")
-
-    if not id or not showSpellID then return end
-
-    local info = C_CurrencyInfo.GetBackpackCurrencyInfo(id)
-    if info and info.currencyTypesID then
+    if id and IsModKeyDown() then
         self:AddLine(format("|cffffedba%s|r %d", ID, id))
         self:Show()
     end
 end
 
-local function SetStyle(tooltip)
-    if not tooltip or tooltip.IsEmbedded or tooltip:IsForbidden() or not tooltip.SetBackdrop then
-        return
+local function SetCurrencyToken(self, idx)
+    if self:IsForbidden() then return end
+
+    if idx and IsModKeyDown() then
+        local id = tonumber(strmatch(C_CurrencyInfo.GetCurrencyListLink(idx),"currency:(%d+)"))
+        self:AddLine(format("|cffffedba%s|r %d", ID, id))
+        self:Show()
     end
+end
+
+local function SetCurrencyTokenByID(self, id)
+    if self:IsForbidden() then return end
+
+    if id and IsModKeyDown() then
+        self:AddLine(format("|cffffedba%s|r %d", ID, id))
+        self:Show()
+    end
+end
+
+local function QuestID(self)
+    if not self or self:IsForbidden() then return end
+
+    local id = self.questLogIndex and C_QuestLog.GetQuestIDForLogIndex(self.questLogIndex) or self.questID
+    if id and IsModKeyDown() then
+        GameTooltip:AddLine(format("|cffffedba%s|r %d", _G.ID, id))
+        GameTooltip:Show()
+    end
+end
+
+local function SetBackpackToken(self, id)
+    if self:IsForbidden() then return end
+
+    if id and IsModKeyDown() then
+        local info = C_CurrencyInfo.GetBackpackCurrencyInfo(id)
+        if info and info.currencyTypesID then
+            self:AddLine(format("|cffffedba%s|r %d", ID, id))
+            self:Show()
+        end
+    end
+end
+
+local function SkinProgressbar(self)
+    if not self or self:IsForbidden() or not self.progressBarPool then return end
+
+	local sb = self.progressBarPool:GetNextActive()
+	if (not sb or not sb.Bar) or sb.Bar.backdrop then return end
+
+	sb.Bar:StripTextures()
+	sb.Bar:CreateBackdrop()
+    sb.Bar:SetStatusBarTexture("Interface/Addons/GW2_UI/textures/uistuff/gwstatusbar")
+    sb.Bar.BorderLeft:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar-bg")
+    sb.Bar.BorderRight:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar-bg")
+    sb.Bar.BorderMid:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar-bg")
+    sb.Bar.LeftDivider:Hide()
+    sb.Bar.RightDivider:Hide()
+
+	self.pbBar = sb.Bar
+end
+
+local function SetStyle(tooltip)
+    if not tooltip or (tooltip == GW.ScanTooltip or tooltip.IsEmbedded or not tooltip.SetBackdrop) or tooltip:IsForbidden() then return end
 
     tooltip:SetBackdrop(constBackdropArgs)
 end
@@ -656,8 +680,8 @@ local function LoadTooltips()
     end
     hooksecurefunc("SharedTooltip_SetBackdropStyle", SetStyle)
     _G.GameTooltipStatusBar:SetStatusBarTexture("Interface/Addons/GW2_UI/textures/hud/castinbar-white")
-    _G.GameTooltip.ItemTooltip:CreateBackdrop(constBackdropArgs)
-
+    _G.GameTooltip.ItemTooltip.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    hooksecurefunc("GameTooltip_ShowProgressBar", SkinProgressbar)
 
     if GetSetting("TOOLTIP_MOUSE") then
         hooksecurefunc("GameTooltip_SetDefaultAnchor", anchorTooltip)
@@ -712,11 +736,13 @@ local function LoadTooltips()
         hooksecurefunc(GameTooltip, "SetCurrencyToken", SetCurrencyToken)
         hooksecurefunc(GameTooltip, "SetCurrencyTokenByID", SetCurrencyTokenByID)
         hooksecurefunc(GameTooltip, "SetBackpackToken", SetBackpackToken)
+        hooksecurefunc("QuestMapLogTitleButton_OnEnter", QuestID)
+        hooksecurefunc("TaskPOI_OnEnter", QuestID)
 
         local eventFrame = CreateFrame("Frame")
         eventFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
         eventFrame:SetScript("OnEvent", function(self, event, key)
-            if key == "LSHIFT" or key == "RSHIFT" or key == "LCTRL" or key == "RCTRL" then
+            if key == "LSHIFT" or key == "RSHIFT" or key == "LCTRL" or key == "RCTRL" or key == 'LALT' or key == 'RALT' then
                 local owner = GameTooltip:GetOwner()
                 local notOnAuras = not (owner and owner.UpdateTooltip)
                 if notOnAuras and UnitExists("mouseover") then

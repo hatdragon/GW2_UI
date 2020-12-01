@@ -33,12 +33,12 @@ local function FormatMoneyForChat(amount)
     local str, coppercolor, silvercolor, goldcolor = "", "|cffb16022", "|cffaaaaaa", "|cffddbc44"
 
     local value = abs(amount)
-    local gold = floor(value / 10000)
-    local silver = floor((value / 100) % 100)
-    local copper = floor(value % 100)
+    local gold = math.floor(value / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+    local silver = math.floor((value - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+    local copper = mod(value, COPPER_PER_SILVER)
 
     if gold > 0 then
-        str = format("%s%d|r|TInterface/MoneyFrame/UI-GoldIcon:12:12|t%s", goldcolor, GW.CommaValue(gold), (silver > 0 or copper > 0) and " " or "")
+        str = format("%s%s|r|TInterface/MoneyFrame/UI-GoldIcon:12:12|t%s", goldcolor, GW.CommaValue(gold), (silver > 0 or copper > 0) and " " or "")
     end
     if silver > 0 then
         str = format("%s%s%d|r|TInterface/MoneyFrame/UI-SilverIcon:12:12|t%s", str, silvercolor, silver, copper > 0 and " " or "")
@@ -523,14 +523,18 @@ GW.FrameFlash = FrameFlash
 local function setItemLevel(button, quality, itemlink, slot)
     button.itemlevel:SetFont(UNIT_NAME_FONT, 12, "THINOUTLINED")
     if quality then
+        local r, g, b = GetItemQualityColor(quality or 1)
         if quality >= Enum.ItemQuality.Common and GetItemQualityColor(quality) then
-            local r, g, b = GetItemQualityColor(quality)
+            r, g, b = GetItemQualityColor(quality)
             button.itemlevel:SetTextColor(r, g, b, 1)
         end
         local slotInfo = GW.GetGearSlotInfo("player", slot, itemlink)
         button.itemlevel:SetText(slotInfo.iLvl)
+        button.itemlevel:SetTextColor(r, g, b, 1)
     else
+        local r, g, b = GetItemQualityColor(1)
         button.itemlevel:SetText("")
+        button.itemlevel:SetTextColor(r, g, b, 1)
     end
 end
 GW.setItemLevel = setItemLevel

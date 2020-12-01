@@ -236,15 +236,15 @@ local function statusBarSetValue(self)
     if not f then
         return
     end
-    local _, mx = self:GetMinMaxValues()
-    local v = self:GetValue()
+    local _, mx = f.StatusBar:GetMinMaxValues()
+    local v = f.StatusBar:GetValue()
     local width = math.max(1, math.min(10, 10 * ((v / mx) / 0.1)))
-    f.StatusBar.Spark:SetPoint("RIGHT", self, "LEFT", 280 * (v / mx), 0)
+    f.StatusBar.Spark:SetPoint("RIGHT", f.StatusBar, "LEFT", 280 * (v / mx), 0)
     f.StatusBar.Spark:SetWidth(width)
-    if self.precentage == nil or self.precentage == false then
-        self.progress:SetText(v .. " / " .. mx)
+    if f.StatusBar.precentage == nil or f.StatusBar.precentage == false then
+        f.StatusBar.progress:SetText(v .. " / " .. mx)
     else
-        self.progress:SetText(math.floor((v / mx) * 100) .. "%")
+        f.StatusBar.progress:SetText(math.floor((v / mx) * 100) .. "%")
     end
 end
 GW.AddForProfiling("objectives", "statusBarSetValue", statusBarSetValue)
@@ -1146,15 +1146,21 @@ local function checkForAutoQuests()
         local questID, popUpType = GetAutoQuestPopUp(i)
         if questID and popUpType == "OFFER" then
             --find our block with that questId
-            local isCampaign = QuestCache:Get(questID):IsCampaign()
-            local questBlockOfIdOrNew = getBlockByID(questID, isCampaign)
-            if questBlockOfIdOrNew and questBlockOfIdOrNew.questID == questID then
-                questBlockOfIdOrNew.popupQuestAccept:Show()
-                questBlockOfIdOrNew.popupQuestAccept:SetScript("OnClick", function(self)
-                    ShowQuestOffer(self:GetParent().id)
-                    RemoveAutoQuestPopUp(self:GetParent().id)
-                    self:Hide()
-                end)
+            local q = QuestCache:Get(questID)
+            if q then
+                local isCampaign = q:IsCampaign()
+                local questBlockOfIdOrNew = getBlockByID(questID, isCampaign)
+                if questBlockOfIdOrNew and questBlockOfIdOrNew.questID == questID then
+                    questBlockOfIdOrNew.popupQuestAccept:Show()
+                    questBlockOfIdOrNew.popupQuestAccept:SetScript("OnClick", function(self)
+                        ShowQuestOffer(self:GetParent().id)
+                        RemoveAutoQuestPopUp(self:GetParent().id)
+                        self:Hide()
+                    end)
+                end
+            else 
+                -- try again in a few frames
+                C_Timer.After(0.5, checkForAutoQuests)
             end
         end
     end
@@ -1223,6 +1229,7 @@ local function tracker_OnUpdate(self)
         GW.NotificationStateChanged(GwObjectivesNotification.shouldDisplay)
     end
 end
+GW.forceCompassHeaderUpdate = tracker_OnUpdate
 GW.AddForProfiling("objectives", "tracker_OnUpdate", tracker_OnUpdate)
 
 local function bonus_OnEnter(self)
@@ -1430,6 +1437,8 @@ local function LoadQuestTracker()
     compassUpdateFrame:RegisterEvent("PLAYER_ENTERING_BATTLEGROUND")
     compassUpdateFrame:RegisterEvent("QUEST_DATA_LOAD_RESULT")
     compassUpdateFrame:RegisterEvent("SUPER_TRACKING_CHANGED")
+    compassUpdateFrame:RegisterEvent("SCENARIO_UPDATE")
+    compassUpdateFrame:RegisterEvent("SCENARIO_CRITERIA_UPDATE")
     compassUpdateFrame:SetScript("OnEvent", function(self, event, ...)
         -- Events for start updating
         if IsIn(event, "PLAYER_STARTED_MOVING", "PLAYER_CONTROL_LOST") then

@@ -78,53 +78,6 @@ local function NewQuestAnimation(block)
 end
 GW.NewQuestAnimation = NewQuestAnimation
 
-local function loadQuestButtons()
-    local actionButton
-    for i = 1, 25 do
-        actionButton = CreateFrame("Button", "GwCampaginItemButton" .. i, GwQuestTracker, "GwQuestItemTemplate")
-        actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-        actionButton.NormalTexture:SetTexture(nil)
-        actionButton:RegisterForClicks("AnyUp")
-        actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
-        actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
-        actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
-        actionButton:SetScript("OnLeave", GameTooltip_Hide)
-        actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
-    end
-    for i = 1, 25 do
-        actionButton = CreateFrame("Button", "GwQuestItemButton" .. i, GwQuestTracker, "GwQuestItemTemplate")
-        actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-        actionButton.NormalTexture:SetTexture(nil)
-        actionButton:RegisterForClicks("AnyUp")
-        actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
-        actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
-        actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
-        actionButton:SetScript("OnLeave", GameTooltip_Hide)
-        actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
-    end
-
-    actionButton = CreateFrame("Button", "GwBonusItemButton", GwQuestTracker, "GwQuestItemTemplate")
-    actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-    actionButton.NormalTexture:SetTexture(nil)
-    actionButton:RegisterForClicks("AnyUp")
-    actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
-    actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
-    actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
-    actionButton:SetScript("OnLeave", GameTooltip_Hide)
-    actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
-
-    actionButton = CreateFrame("Button", "GwScenarioItemButton", GwQuestTracker, "GwQuestItemTemplate")
-    actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-    actionButton.NormalTexture:SetTexture(nil)
-    actionButton:RegisterForClicks("AnyUp")
-    actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
-    actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
-    actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
-    actionButton:SetScript("OnLeave", GameTooltip_Hide)
-    actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
-end
-GW.AddForProfiling("objectives", "loadQuestButtons", loadQuestButtons)
-
 local function ParseSimpleObjective(text)
     local itemName, numItems, numNeeded = string.match(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)")
 
@@ -439,6 +392,18 @@ local function getBlockQuest(blockIndex, isFrequency)
         end
     )
     newBlock.joingroup:SetScript("OnLeave", GameTooltip_Hide)
+
+    -- quest item button here
+    newBlock.actionButton = CreateFrame("Button", nil, GwQuestTracker, "GwQuestItemTemplate")
+    newBlock.actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    newBlock.actionButton.NormalTexture:SetTexture(nil)
+    newBlock.actionButton:RegisterForClicks("AnyUp")
+    newBlock.actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
+    newBlock.actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
+    newBlock.actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
+    newBlock.actionButton:SetScript("OnLeave", GameTooltip_Hide)
+    newBlock.actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
+
     return newBlock
 end
 GW.AddForProfiling("objectives", "getBlockQuest", getBlockQuest)
@@ -478,6 +443,18 @@ local function getBlockCampaign(blockIndex)
         end
     )
     newBlock.joingroup:SetScript("OnLeave", GameTooltip_Hide)
+
+    -- quest item button here
+    newBlock.actionButton = CreateFrame("Button", nil, GwQuestTracker, "GwQuestItemTemplate")
+    newBlock.actionButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    newBlock.actionButton.NormalTexture:SetTexture(nil)
+    newBlock.actionButton:RegisterForClicks("AnyUp")
+    newBlock.actionButton:SetScript("OnShow", QuestObjectiveItem_OnShow)
+    newBlock.actionButton:SetScript("OnHide", QuestObjectiveItem_OnHide)
+    newBlock.actionButton:SetScript("OnEnter", QuestObjectiveItem_OnEnter)
+    newBlock.actionButton:SetScript("OnLeave", GameTooltip_Hide)
+    newBlock.actionButton:SetScript("OnEvent", QuestObjectiveItem_OnEvent)
+
     return newBlock
 end
 GW.AddForProfiling("objectives", "getBlockCampaign", getBlockCampaign)
@@ -576,9 +553,9 @@ itemButtonUpdateAfterCombat:SetScript("OnEvent", function(self, event)
     GW.updateQuestLogLayout(GwQuesttrackerContainerQuests)
 end)
 
-local function UpdateQuestItem(button, questLogIndex, block)
-    if InCombatLockdown() or not button then
-        if block and questLogIndex and questLogIndex > 0 and GetQuestLogSpecialItemInfo(questLogIndex) then
+local function UpdateQuestItem(block)
+    if InCombatLockdown() then
+        if block.questLogIndex and block.questLogIndex > 0 and GetQuestLogSpecialItemInfo(block.questLogIndex) then
             itemButtonUpdateAfterCombat:RegisterEvent("PLAYER_REGEN_ENABLED")
         end
         return
@@ -586,33 +563,29 @@ local function UpdateQuestItem(button, questLogIndex, block)
 
     local link, item, charges, showItemWhenComplete = nil, nil, nil, false
 
-    if questLogIndex then
-        link, item, charges, showItemWhenComplete = GetQuestLogSpecialItemInfo(questLogIndex)
+    if block.questLogIndex then
+        link, item, charges, showItemWhenComplete = GetQuestLogSpecialItemInfo(block.questLogIndex)
     end
 
     local isQuestComplete = (block and block.questID) and QuestCache:Get(block.questID):IsComplete() or false
     local shouldShowItem = item and (not isQuestComplete or showItemWhenComplete)
-
     if shouldShowItem then
-        if block then block.hasItem = true end
+        block.actionButton:SetID(block.questLogIndex)
 
-        button:SetID(questLogIndex)
+        block.actionButton:SetAttribute("type", "item")
+        block.actionButton:SetAttribute("item", link)
 
-        button:SetAttribute("type", "item")
-        button:SetAttribute("item", link)
+        block.actionButton.charges = charges
+        block.actionButton.rangeTimer = -1
+        SetItemButtonTexture(block.actionButton, item)
+        SetItemButtonCount(block.actionButton, charges)
 
-        button.charges = charges
-        button.rangeTimer = -1
-        SetItemButtonTexture(button, item)
-        SetItemButtonCount(button, charges)
-
-        QuestObjectiveItem_UpdateCooldown(button)
-        button:SetScript("OnUpdate", QuestObjectiveItem_OnUpdate)
-        button:Show()
+        QuestObjectiveItem_UpdateCooldown(block.actionButton)
+        block.actionButton:SetScript("OnUpdate", QuestObjectiveItem_OnUpdate)
+        block.actionButton:Show()
     else
-        button:Hide()
-        button:SetScript("OnUpdate", nil)
-        if block then block.hasItem = false end
+        block.actionButton:Hide()
+        block.actionButton:SetScript("OnUpdate", nil)
     end
 end
 GW.UpdateQuestItem = UpdateQuestItem
@@ -682,7 +655,7 @@ local function updateQuest(self, block, questWatchId, quest)
 
         --Quest item
         local itemButton = quest:IsCampaign() and "GwCampaginItemButton" or "GwQuestItemButton"
-        UpdateQuestItem(_G[itemButton .. questWatchId], questLogIndex, block)
+        UpdateQuestItem(block)
 
         if numObjectives == 0 and GetMoney() >= requiredMoney and (questInfo and not questInfo.startEvent) then
             isComplete = true
@@ -770,7 +743,7 @@ local function updateQuestByID(self, block, quest, questID, questWatchId, questL
 
     --Quest item
     local itemButton = quest:IsCampaign() and "GwCampaginItemButton" or "GwQuestItemButton"
-    UpdateQuestItem(_G[itemButton .. questWatchId], questLogIndex, block)
+    UpdateQuestItem(block)
 
     if numObjectives == 0 and GetMoney() >= requiredMoney and (questInfo and not questInfo.startEvent) then
         isComplete = true
@@ -831,7 +804,7 @@ local function updateQuestByID(self, block, quest, questID, questWatchId, questL
     block:SetHeight(block.height)
     wipe(questInfo)
 end
-GW.AddForProfiling("objectives", "updateQuest", updateQuest)
+GW.AddForProfiling("objectives", "updateQuestByID", updateQuestByID)
 
 local questButtonHelperFrame = CreateFrame("Frame")
 questButtonHelperFrame:SetScript("OnEvent", function(self, event)
@@ -959,14 +932,6 @@ local function updateQuestLogLayout(self)
         shouldShowQuests = false
     end
 
-    -- first set all questbuttons to nil
-    for i = 1, 25 do
-        if _G["GwCampaignBlock" .. i] ~= nil then
-            UpdateQuestItem(_G["GwCampaginItemButton" .. i], 0, _G["GwCampaignBlock" .. i])
-            UpdateQuestItem(_G["GwQuestItemButton" .. i], 0, _G["GwQuestBlock" .. i])
-        end
-    end
-
     for i = 1, numQuests do
         local questID = C_QuestLog.GetQuestIDForQuestWatchIndex(i)
         
@@ -990,12 +955,13 @@ local function updateQuestLogLayout(self)
                     updateQuest(self, block, i, q)
                     block:Show()
                     savedHeightCampagin = savedHeightCampagin + block.height
-                    updateQuestItemPositions(_G["GwCampaginItemButton" .. i], savedHeightCampagin, nil, block)
+                    updateQuestItemPositions(block.actionButton, savedHeightCampagin, nil, block)
                 else
                     counterCampaign = counterCampaign + 1
                     if _G["GwCampaignBlock" .. counterCampaign] ~= nil then
                         _G["GwCampaignBlock" .. counterCampaign]:Hide()
-                        UpdateQuestItem(_G["GwCampaginItemButton" .. i], 0, _G["GwCampaignBlock" .. counterCampaign])
+                        _G["GwCampaignBlock" .. counterCampaign].questLogIndex = 0
+                        UpdateQuestItem(_G["GwCampaignBlock" .. counterCampaign])
                     end
                 end
             elseif q then
@@ -1026,12 +992,13 @@ local function updateQuestLogLayout(self)
                     block.isFrequency = isFrequency
                     block:Show()
                     savedHeightQuest = savedHeightQuest + block.height
-                    updateQuestItemPositions(_G["GwQuestItemButton" .. i], savedHeightQuest, "QUEST", block)
+                    updateQuestItemPositions(block.actionButton, savedHeightQuest, "QUEST", block)
                 else
                     counterQuest = counterQuest + 1
                     if _G["GwQuestBlock" .. counterQuest] ~= nil then
                         _G["GwQuestBlock" .. counterQuest]:Hide()
-                        UpdateQuestItem(_G["GwQuestItemButton" .. i], 0, _G["GwQuestBlock" .. counterQuest])
+                        _G["GwQuestBlock" .. counterQuest].questLogIndex = 0
+                        UpdateQuestItem(_G["GwQuestBlock" .. counterQuest])
                     end
                 end
             end
@@ -1045,15 +1012,17 @@ local function updateQuestLogLayout(self)
     for i = counterCampaign + 1, 25 do
         if _G["GwCampaignBlock" .. i] ~= nil then
             _G["GwCampaignBlock" .. i].questID = nil
+            _G["GwCampaignBlock" .. i].questLogIndex = 0
             _G["GwCampaignBlock" .. i]:Hide()
-            UpdateQuestItem(_G["GwCampaginItemButton" .. i], 0, _G["GwCampaignBlock" .. i])
+            UpdateQuestItem(_G["GwCampaignBlock" .. i])
         end
     end
     for i = counterQuest + 1, 25 do
         if _G["GwQuestBlock" .. i] ~= nil then
             _G["GwQuestBlock" .. i].questID = nil
+            _G["GwQuestBlock" .. i].questLogIndex = 0
             _G["GwQuestBlock" .. i]:Hide()
-            UpdateQuestItem(_G["GwQuestItemButton" .. i], 0, _G["GwQuestBlock" .. i])
+            UpdateQuestItem(_G["GwQuestBlock" .. i])
         end
     end
 
@@ -1130,7 +1099,7 @@ local function updateQuestLogLayoutSingle(self, questID, added)
                     break
                 end
             end
-            updateQuestItemPositions(_G[itemButton .. questWatchId], heightForQuestItem, isCampaign and nil or "QUEST", questBlockOfIdOrNew)
+            updateQuestItemPositions(questBlockOfIdOrNew.actionButton, heightForQuestItem, isCampaign and nil or "QUEST", questBlockOfIdOrNew)
         end
 
         -- Set number of quest to the Header
@@ -1411,7 +1380,6 @@ local function LoadQuestTracker()
     )
     header.title:SetTextColor(TRACKER_TYPE_COLOR.QUEST.r, TRACKER_TYPE_COLOR.QUEST.g, TRACKER_TYPE_COLOR.QUEST.b)
 
-    loadQuestButtons()
     fQuest.init = false
     tracker_OnEvent(fQuest, "LOAD")
 

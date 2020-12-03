@@ -22,6 +22,12 @@ local function SkinPostalAddonFrame()
         Postal_OpenAllMenuButton:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_down")
         Postal_OpenAllMenuButton:SetPushedTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_down")
         Postal_OpenAllMenuButton:SetDisabledTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_up")
+
+        Postal_BlackBookButton:SetNormalTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_up")
+        Postal_BlackBookButton:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_up")
+        Postal_BlackBookButton:SetPushedTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_up")
+        Postal_BlackBookButton:SetDisabledTexture("Interface/AddOns/GW2_UI/textures/uistuff/arrowdown_up")
+
     end
 end
 GW.SkinPostalAddonFrame = SkinPostalAddonFrame

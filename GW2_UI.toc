@@ -173,3 +173,6 @@ battlegrounds/battlegrounds.lua
 
 tests/mocks.lua
 tests/alert_tests.lua
+
+guild/guild.xml
+guild/guild.lua

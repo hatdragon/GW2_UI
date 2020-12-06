@@ -23,6 +23,7 @@ GW.wowbuild = tonumber(GW.wowbuild)
 
 GW.ScanTooltip = CreateFrame("GameTooltip", "GW2_UI_ScanTooltip", UIParent, "GameTooltipTemplate")
 GW.HiddenFrame = CreateFrame("Frame")
+GW.HiddenFrame.HiddenString = GW.HiddenFrame:CreateFontString(nil, "OVERLAY")
 GW.HiddenFrame:Hide()
 
 --Tables
@@ -37,6 +38,9 @@ GW.scaleableMainHudFrames = {}
 
 -- Init global function
 GW.InitLocationDataHandler()
+
+-- Init error handler
+GW.RegisterErrorHandler()
 
 GW.AlertContainerFrame = nil
 

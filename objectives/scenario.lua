@@ -9,8 +9,6 @@ local setBlockColor = GW.setBlockColor
 
 local TIME_FOR_3 = 0.6
 local TIME_FOR_2 = 0.8
-local remainingDeathText = ""
-local remainingDeath = 4
 
 local JAILERS_TOWER_LEVEL_TYPE_STRINGS = {
     [Enum.JailersTowerType.TwistingCorridors] = JAILERS_TOWER_LEVEL_TOAST_TWISTING_CORRIDORS,
@@ -30,6 +28,7 @@ local function getObjectiveBlock(self, index)
     if _G[self:GetName() .. "GwQuestObjective" .. index] ~= nil then
         _G[self:GetName() .. "GwQuestObjective" .. index]:SetScript("OnEnter", nil)
         _G[self:GetName() .. "GwQuestObjective" .. index]:SetScript("OnLeave", nil)
+        _G[self:GetName() .. "GwQuestObjective" .. index].StatusBar:SetStatusBarColor(self.color.r, self.color.g, self.color.b)
         return _G[self:GetName() .. "GwQuestObjective" .. index]
     end
 
@@ -106,6 +105,7 @@ local function updateCurrentScenario(self, event, ...)
         end
     end
     GW.RemoveTrackerNotificationOfType("SCENARIO")
+    GW.RemoveTrackerNotificationOfType("TORGHAST")
 
     local compassData = {}
     local showTimerAsBonus = false
@@ -147,7 +147,6 @@ local function updateCurrentScenario(self, event, ...)
 
     local _, _, numStages, _, _, _, _, _, _, scenarioType = C_Scenario.GetInfo()
     local inWarfront = (scenarioType == LE_SCENARIO_TYPE_WARFRONT)
-
     if (numStages == 0 or IsOnGroundFloorInJailersTower()) then
         local name, instanceType, _, difficultyName, _ = GetInstanceInfo()
         if instanceType == "raid" then
@@ -157,6 +156,7 @@ local function updateCurrentScenario(self, event, ...)
             GwScenarioBlock.height = GwScenarioBlock.height + 5
         else
             GW.RemoveTrackerNotificationOfType("SCENARIO")
+            GW.RemoveTrackerNotificationOfType("TORGHAST")
             GwScenarioBlock:Hide()
         end
         UpdateQuestItem(GwScenarioBlock)
@@ -192,25 +192,25 @@ local function updateCurrentScenario(self, event, ...)
     end
 
     if IsInJailersTower() then
+        local level
         if event == "JAILERS_TOWER_LEVEL_UPDATE" then
             local _, type = ...
-            if type then self.jailersTower.type = type end
+            if type then self.jailersTowerType = type end
         end
         local widgetInfo = C_UIWidgetManager.GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo(2319)
         if widgetInfo then
-            self.jailersTower.level = widgetInfo.headerText or ""
+            level = widgetInfo.headerText or ""
         end
 
-        local typeString = JAILERS_TOWER_LEVEL_TYPE_STRINGS[self.jailersTower.type]
+        local typeString = JAILERS_TOWER_LEVEL_TYPE_STRINGS[self.jailersTowerType]
         if typeString then
-            compassData.TITLE = difficultyName .. " |cFFFFFFFF " .. self.jailersTower.level .. " - " .. typeString .. "|r"
+            compassData.TITLE = difficultyName .. " |cFFFFFFFF " .. level .. " - " .. typeString .. "|r"
         else
-            compassData.TITLE = difficultyName .. " |cFFFFFFFF " .. self.jailersTower.level .. "|r"
+            compassData.TITLE = difficultyName .. " |cFFFFFFFF " .. level .. "|r"
         end
 
         compassData.COLOR = TRACKER_TYPE_COLOR.TORGHAST
         compassData.TYPE = "TORGHAST"
-
     end
     setBlockColor(GwScenarioBlock, compassData.TYPE)
     GwScenarioBlock.Header:SetTextColor(GwScenarioBlock.color.r, GwScenarioBlock.color.g, GwScenarioBlock.color.b)
@@ -283,6 +283,7 @@ local function updateCurrentScenario(self, event, ...)
         numCriteria = numCriteria + 1
     elseif IsInJailersTower() then
         local widgetInfo = C_UIWidgetManager.GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo(2319)
+        local remainingDeathText, remainingDeath = "", ""
         if widgetInfo then
             local currencies = widgetInfo.currencies
             remainingDeathText = currencies[1].tooltip
@@ -603,10 +604,7 @@ local function LoadScenarioFrame()
     GwQuesttrackerContainerScenario:RegisterEvent("SCENARIO_SPELL_UPDATE")
     GwQuesttrackerContainerScenario:RegisterEvent("JAILERS_TOWER_LEVEL_UPDATE")
 
-    GwQuesttrackerContainerScenario.jailersTower = {}
-    GwQuesttrackerContainerScenario.jailersTower.level = nil
-    GwQuesttrackerContainerScenario.jailersTower.type = nil
-
+    GwQuesttrackerContainerScenario.jailersTowerType = nil
 
     local timerBlock = CreateFrame("Button", "GwQuestTrackerTimer", GwQuesttrackerContainerScenario, "GwQuesttrackerScenarioBlock")
     timerBlock.height = timerBlock:GetHeight()

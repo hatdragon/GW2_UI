@@ -267,6 +267,7 @@ end
 
 local settings_window_open_before_change = false
 local function lockHudObjects(self, inCombat)
+    GwSettingsWindowMoveHud:UnregisterAllEvents()
     if InCombatLockdown() then
         DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r " .. L["HUD_MOVE_ERR"])
         return
@@ -315,8 +316,8 @@ local function moveHudObjects(self)
     self:SetScript("OnEvent", function(self, event)
         if event == "PLAYER_REGEN_DISABLED" then
             DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r " .. L["HUD_MOVE_ERR"])
-            lockHudObjects(self.lhb, true)
             self:UnregisterEvent(event)
+            lockHudObjects(self.lhb, true)
         end
     end)
 end

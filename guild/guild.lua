@@ -6,6 +6,7 @@ local SetSetting = GW.SetSetting
 local GetSetting = GW.GetSetting
 
 local IsCommunityHooked = false
+local hasBeenLoaded = false
 local _motdScrollFrame 
 
 local COMMUNITIES_FRAME_EVENTS = {
@@ -97,7 +98,8 @@ end
 local function ConfigureMover()
     -- movable stuff
     local pos = GetSetting("COMMUNITYFRAME_POSITION")
-    GWCommunitiesWindow.mover = CreateFrame("Frame", nil)
+
+    GWCommunitiesWindow.mover = CreateFrame("Frame", nil, GWCommunitiesWindow)
     GWCommunitiesWindow.mover:EnableMouse(true)
     GWCommunitiesWindow:SetMovable(true)
     GWCommunitiesWindow.mover:SetSize(newWidth, 30)
@@ -122,7 +124,7 @@ local function ConfigureMover()
         self:ClearAllPoints()
         self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y)
         self.SetPoint = GW.NoOp -- Prevent Blizzard to reanchor that frame
-        
+
         -- store the updated position
         if self.mover.onMoveSetting then
             local pos = GetSetting(self.mover.onMoveSetting)
@@ -282,22 +284,18 @@ end
 
 -- end
 
-function Copy_Table(src, dest)
-	for index, value in pairs(src) do
-		if type(value) == "table" then
-			dest[index] = {}
-			Copy_Table(value, dest[index])
-		else
-			dest[index] = value
-		end
-	end
-end 
-
 
 local function BuildCommunitiesFrame()
-    
+    if hasBeenLoaded then
+        ShowUIPanel(GWCommunitiesWindow)
+        UIFrameFadeIn(GWCommunitiesWindow, 0.2, 0, 1)
+        return
+    end
+    hasBeenLoaded = true
+
     local sWindow = CreateFrame("Frame", "GWCommunitiesWindow", UIParent, "GwCommunitiesWindowTemplate")
-    --sWindow:SetClampedToScreen(true)
+    sWindow.secure:SetFrameRef("GWCommunitiesWindow", sWindow)
+
     tinsert(UISpecialFrames, "GWCommunitiesWindow")
     ConfigureMover()
 
@@ -306,7 +304,7 @@ local function BuildCommunitiesFrame()
 
 
     sWindow.PortraitOverlay = CreateFrame("Frame", sWindow)
-    Copy_Table(_G.CommunitiesFrame.PortraitOverlay, sWindow.PortraitOverlay)
+    --Copy_Table(_G.CommunitiesFrame.PortraitOverlay, sWindow.PortraitOverlay)
     sWindow.PortraitOverlay:SetSize(100,100)
     sWindow.PortraitOverlay:SetPoint("TOPLEFT", sWindow.WindowHeader, "BOTTOMLEFT", 0, 5)
 
@@ -332,12 +330,30 @@ local function RegisterEvents()
     eventFrame:SetScript("OnEvent", _onEvent)
 end
 
-local function noOp()
---    DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r HOOKED MIN")
---    NOOP, we aren't doing min/max
-end
-
 function GW:SkinGuildFrames()
+    ToggleCommunitiesFrame();
+    local communitiesFrame = CommunitiesFrame;
+    
+    if( not communitiesFrame:IsShown()) then
+		return;
+    end
+    
+	if (isGuildType) then
+		communitiesFrame:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER);
+	else
+		communitiesFrame:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.COMMUNITY_FINDER);
+	end
+
+    
+
+	communitiesFrame.GuildFinderFrame.isGuildType = isGuildType;
+	communitiesFrame.GuildFinderFrame.selectedTab = 1;
+	communitiesFrame.GuildFinderFrame:UpdateType();
+
+	communitiesFrame:SelectClub(nil);
+	communitiesFrame.Inset:Hide();
+
+
     RegisterEvents()
 
     if not IsAddOnLoaded("Blizzard_Communities") then
@@ -345,9 +361,10 @@ function GW:SkinGuildFrames()
     end
 
     if not IsCommunityHooked and IsAddOnLoaded("Blizzard_Communities") and _G.CommunitiesFrame then
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffedbaGW2 UI:|r Checking hook for Guild frames " )
         _G.CommunitiesFrame:HookScript("OnShow", BuildCommunitiesFrame)
-        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Minimize", noOp)
-        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Maximize", noOp)
+        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Minimize", GW.NoOp)
+        hooksecurefunc(_G.CommunitiesFrame.MaximizeMinimizeFrame, "Maximize", GW.NoOp)
         IsCommunityHooked = true
     end
 end

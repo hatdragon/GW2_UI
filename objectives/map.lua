@@ -149,8 +149,8 @@ GW.AddForProfiling("map", "hideMiniMapIcons", hideMiniMapIcons)
 
 local function MapCoordsMiniMap_OnEnter(self) 
     GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, 5)
-    GameTooltip:AddLine(L["MAP_COORDINATES_TITLE"])  
-    GameTooltip:AddLine(L["MAP_COORDINATES_TOGGLE_TEXT"], 1, 1, 1, true) 
+    GameTooltip:AddLine(L["Map Coordinates"])  
+    GameTooltip:AddLine(L["Left Click to toggle higher precision coordinates."], 1, 1, 1, true) 
     GameTooltip:SetMinimumWidth(100)
     GameTooltip:Show()
 end
@@ -238,10 +238,10 @@ local function time_OnEnter(self)
 
     GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, 5)
     GameTooltip:AddLine(TIMEMANAGER_TITLE)
-    GameTooltip:AddLine(L["MAP_CLOCK_MILITARY"], 1, 1, 1, TRUE)
-    GameTooltip:AddLine(L["MAP_CLOCK_LOCAL_REALM"], 1, 1, 1, TRUE)
-    GameTooltip:AddLine(L["MAP_CLOCK_STOPWATCH"], 1, 1, 1, TRUE)
-    GameTooltip:AddLine(L["MAP_CLOCK_TIMEMANAGER"], 1, 1, 1, TRUE)
+    GameTooltip:AddLine(L["Shift-Click to toggle military time format"], 1, 1, 1, TRUE)
+    GameTooltip:AddLine(L["Left Click to switch between Local and Realm time"], 1, 1, 1, TRUE)
+    GameTooltip:AddLine(L["Right Click to open the Stopwatch"], 1, 1, 1, TRUE)
+    GameTooltip:AddLine(L["Shift-Right Click to open the Time Manager"], 1, 1, 1, TRUE)
     GameTooltip:AddDoubleLine(WORLD_MAP_FILTER_TITLE .. " ", string, nil, nil, nil, 1, 1, 0)
     GameTooltip:SetMinimumWidth(100)
     GameTooltip:Show()
@@ -361,18 +361,18 @@ local function setMinimapButtons(side)
     GwAddonToggle.container:ClearAllPoints()
     
     if side == "left" then
-        QueueStatusMinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -5, -69)
+        QueueStatusMinimapButton:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -8.5, -69)
         GameTimeFrame:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -7, 0)
         GarrisonLandingPageMinimapButton:SetPoint("BOTTOMRIGHT", Minimap, "BOTTOMLEFT", 1, -7)
-        GwMailButton:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -12, -47)
-        GwAddonToggle:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -5.5, -127)
+        GwMailButton:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -16, -47)
+        GwAddonToggle:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -10, -127)
         GwAddonToggle.container:SetPoint("RIGHT", GwAddonToggle, "LEFT")
     else
-        QueueStatusMinimapButton:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 5, -69)
+        QueueStatusMinimapButton:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 8, -69)
         GameTimeFrame:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 7, 0)
         GarrisonLandingPageMinimapButton:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMRIGHT", -1, -7)
-        GwMailButton:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 10, -47)
-        GwAddonToggle:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 5.5, -127)
+        GwMailButton:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 14, -47)
+        GwAddonToggle:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", 8, -127)
         GwAddonToggle.container:SetPoint("LEFT", GwAddonToggle, "RIGHT")
     end
     GarrisonLandingPageMinimapButton.SetPoint = GW.NoOp
@@ -380,9 +380,22 @@ local function setMinimapButtons(side)
 end
 GW.setMinimapButtons = setMinimapButtons
 
+local function MinimapPostDrag(self)
+    _G.MinimapBackdrop:ClearAllPoints()
+    _G.MinimapBackdrop:SetAllPoints(_G.Minimap)
+
+    local x = self.gwMover:GetCenter()
+    local screenWidth = UIParent:GetRight()
+    if x > (screenWidth / 2) then
+        GW.setMinimapButtons("left")
+    else
+        GW.setMinimapButtons("right")
+    end
+end
+
 local function LoadMinimap()
     -- https://wowwiki.wikia.com/wiki/USERAPI_GetMinimapShape
-    _G["GetMinimapShape"] = getMinimapShape
+    _G.GetMinimapShape = getMinimapShape
 
     local GwMinimapShadow = CreateFrame("Frame", "GwMinimapShadow", Minimap, "GwMinimapShadow")
 
@@ -623,7 +636,7 @@ local function LoadMinimap()
     Minimap:SetSize(size, size)
 
     -- mobeable stuff
-    GW.RegisterMovableFrame(Minimap, MINIMAP_LABEL, "MinimapPos", "VerticalActionBarDummy", {size, size}, nil, {"default"})
+    GW.RegisterMovableFrame(Minimap, MINIMAP_LABEL, "MinimapPos", "VerticalActionBarDummy", {size, size}, nil, {"default"}, nil, MinimapPostDrag)
     Minimap:ClearAllPoints()
     Minimap:SetPoint("TOPLEFT", Minimap.gwMover)
     -- check on which side we need to set the buttons

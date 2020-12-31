@@ -510,6 +510,10 @@ local function loadAddon(self)
     if GetSetting("WORLDMAP_COORDS_TOGGLE") then
         GW.AddCoordsToWorldMap()
     end
+    
+    if GetSetting("COMMUNITIES_SKIN_ENABLED") then
+        GW.SkinCommunities()
+    end
 
     GW.LoadVehicleButton()
     GW.MakeAltPowerBarMovable()

@@ -36,6 +36,7 @@ local function LoadSkinsPanel(sWindow)
     addOption(p, INSPECT, nil, "INSPECTION_SKIN_ENABLED")
     addOption(p, DRESSUP_FRAME, nil, "DRESSUP_SKIN_ENABLED")
     addOption(p, HELP_FRAME_TITLE, nil, "HELPFRAME_SKIN_ENABLED")
+    addOption(p, GUILD_AND_COMMUNITIES, nil, "COMMUNITIES_SKIN_ENABLED")
 
     InitPanel(p)
 end

@@ -600,7 +600,7 @@ local function loadAddon(self)
 
     GW.LoadCharacter()
 
-    GW.LoadBreathMeter()
+    GW.LoadMirrorTimers()
     GW.LoadAutoRepair()
 
     --Create unitframes

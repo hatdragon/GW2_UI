@@ -1,6 +1,26 @@
 local _, GW = ...
 local v = GW.vernotes
 
+v("5.7.6", [=[
+FIXES
+    - Fix castbar latency issue
+]=])
+
+v("5.7.5", [=[
+FIXES
+    - Fix chatframe fade
+    - Update party portraits correctly
+    - Fix arena headers
+    - Fix keybind slash command
+    - Fix arena prep frames overlaps with quests
+]=])
+
+v("5.7.4", [=[
+FIXES
+    - Fix some castbar issues
+    - Fix some mirrottimer issues
+]=])
+
 v("5.7.2", [=[
 FIXES
     - Fix scrolling in dropdown settings

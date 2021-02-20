@@ -1,8 +1,31 @@
-5.7.6
+5.9.0
+NEW
+    - Added "player frame in target frame style"
+    - Immersive Questing: "Next Gossip" with space
+    - Show cooldowns at bags and character correct by using our own cooldown system
+    - Added toggle for player PvP indicator
+    - Added "World Quest Addon"-Skin (embedded into Objectives tracker)
+    - Added option to invert target/focus frame
+    - Immersive Questing: Now works with auto accepting quest addons like AAP
+
+FIXES
+    - Update "Raid Debuffs"
+    - Guild auto repair if not in guild
+    - Gamemenu fixes to better interact with ElvUI
+    - Immersive Questing: "Ignore"-Button now only shows if applicable
+
+5.8.0
+NEW
+    - Added Talent Set Manager support (button on hero panel)
+    - Button flyout direction is based on actionbar screen position
+
 FIXES
     - Fix castbar latency issue
     - Fix rested expbar issue
     - Fix inactive factions listed under classic and others
+    - Fix Postal skin issue
+    - Update "Raid Debuffs"
+    - Possible fix for chatframe floating max error
 
 5.7.5
 FIXES

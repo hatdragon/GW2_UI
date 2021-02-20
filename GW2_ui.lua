@@ -422,7 +422,7 @@ local function loadAddon(self)
     else
         --Setup addon button
         local GwMainMenuFrame = CreateFrame("Button", "GW2_UI_SettingsButton", _G.GameMenuFrame, "GameMenuButtonTemplate") -- add a button name to you that for other Addons
-        GwMainMenuFrame:SetText(format("|cffffedba%s|r", L["GW2 UI Settings"]))
+        GwMainMenuFrame:SetText(format("|cffffedba%s|r", GW.addonName))
         GwMainMenuFrame:SetScript(
             "OnClick",
             function()
@@ -435,14 +435,12 @@ local function loadAddon(self)
                 HideUIPanel(GameMenuFrame)
             end
         )
-        GameMenuFrame[L["GW2 UI Settings"]] = GwMainMenuFrame
+        GameMenuFrame[GW.addonName] = GwMainMenuFrame
 
         if not IsAddOnLoaded("ConsolePortUI_Menu") then
-            GwMainMenuFrame:SetSize(GameMenuButtonLogout:GetWidth(), GameMenuButtonLogout:GetHeight())
-            GwMainMenuFrame:SetPoint("TOPLEFT", IsAddOnLoaded("ElvUI") and GameMenuButtonContinue or GameMenuButtonAddons, "BOTTOMLEFT", 0, -1)
-            if not IsAddOnLoaded("ElvUI") then
-                hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", GW.PositionGameMenuButton)
-            end
+            GwMainMenuFrame:SetSize(GameMenuButtonMacros:GetWidth(), GameMenuButtonMacros:GetHeight())
+            GwMainMenuFrame:SetPoint("TOPLEFT", GameMenuButtonMacros, "BOTTOMLEFT", 0, -1)
+            hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", GW.PositionGameMenuButton)
         end
     end
     if GetSetting("STATICPOPUP_SKIN_ENABLED") then
@@ -450,9 +448,6 @@ local function loadAddon(self)
     end
     if GetSetting("BNTOASTFRAME_SKIN_ENABLED") then
         GW.SkinBNToastFrame()
-    end
-    if GetSetting("GHOSTFRAME_SKIN_ENABLED") then
-        GW.SkinGhostFrame()
     end
     if GetSetting("DEATHRECAPFRAME_SKIN_ENABLED") then
         GW.SkinDeathRecapFrame()
@@ -469,8 +464,9 @@ local function loadAddon(self)
     if GetSetting("TALKINGHEAD_SKIN_ENABLED") then
         GW.SkinAndPositionTalkingHeadFrame()
     end
-    if GetSetting("TIMERTRACKER_SKIN_ENABLED") then
+    if GetSetting("MISC_SKIN_ENABLED") then
         GW.SkinTimerTrackerFrame()
+        GW.SkinGhostFrame()
     end
     if GetSetting("IMMERSIONADDON_SKIN_ENABLED") then
         GW.SkinImmersionAddonFrame()
@@ -577,12 +573,15 @@ local function loadAddon(self)
     end
 
     --Create player hud
-    if GetSetting("HEALTHGLOBE_ENABLED") then
+    if GetSetting("HEALTHGLOBE_ENABLED") and not GetSetting("PLAYER_AS_TARGET_FRAME") then
         local hg = GW.LoadHealthGlobe()
-        GW.LoadDodgeBar(hg)
+        GW.LoadDodgeBar(hg, false)
+    elseif GetSetting("HEALTHGLOBE_ENABLED") and GetSetting("PLAYER_AS_TARGET_FRAME") then
+        local hg = GW.LoadPlayerFrame()
+        GW.LoadDodgeBar(hg, true)
     end
 
-    if GetSetting("POWERBAR_ENABLED") then
+    if GetSetting("POWERBAR_ENABLED") and not GetSetting("PLAYER_AS_TARGET_FRAME") then
         GW.LoadPowerBar()
     end
 

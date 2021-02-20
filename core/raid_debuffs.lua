@@ -146,6 +146,8 @@ end
     SetDefaultOnTheFly(330713) -- Reverberating Pain
     SetDefaultOnTheFly(329370) -- Deadly Descent
     SetDefaultOnTheFly(336494) -- Echo Screech
+    SetDefaultOnTheFly(346301) -- Bloodlight
+    SetDefaultOnTheFly(342077) -- Echolocation
     -- Huntsman Altimor
     SetDefaultOnTheFly(335304) -- Sinseeker
     SetDefaultOnTheFly(334971) -- Jagged Claws
@@ -154,6 +156,7 @@ end
     SetDefaultOnTheFly(335113) -- Huntsman's Mark 1
     SetDefaultOnTheFly(334945) -- Vicious Lunge
     SetDefaultOnTheFly(334852) -- Petrifying Howl
+    SetDefaultOnTheFly(334695) -- Destabilize
     -- Hungering Destroyer
     SetDefaultOnTheFly(334228) -- Volatile Ejection
     SetDefaultOnTheFly(329298) -- Gluttonous Miasma
@@ -221,3 +224,4 @@ end
     SetDefaultOnTheFly(329951) -- Impale
     SetDefaultOnTheFly(327039) -- Feeding Time
     SetDefaultOnTheFly(332794) -- Fatal Finesse
+    SetDefaultOnTheFly(334016) -- Unworthy

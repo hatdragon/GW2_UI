@@ -1,18 +1,24 @@
 local _, GW = ...
+local L = GW.L
 local addOption = GW.AddOption
 local createCat = GW.CreateCat
 local InitPanel = GW.InitPanel
 
 local function LoadSkinsPanel(sWindow)
     local p = CreateFrame("Frame", nil, sWindow.panels, "GwSettingsPanelTmpl")
-    p.header:SetFont(DAMAGE_TEXT_FONT, 20)
-    p.header:SetTextColor(255 / 255, 241 / 255, 209 / 255)
-    p.header:SetText("General Skins")
-    p.sub:SetFont(UNIT_NAME_FONT, 12)
-    p.sub:SetTextColor(181 / 255, 160 / 255, 128 / 255)
-    p.sub:SetText("Enable or disable the skins you need and don't need.")
+    p.header:Hide()
+    p.sub:Hide()
 
-    createCat("General Skins", "Enable and disable general skins", p, 6)
+    local p_blizzard = CreateFrame("Frame", nil, p, "GwSettingsPanelTmpl")
+    p_blizzard:SetHeight(500)
+    p_blizzard:ClearAllPoints()
+    p_blizzard:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
+    p_blizzard.header:SetFont(DAMAGE_TEXT_FONT, 20)
+    p_blizzard.header:SetTextColor(255 / 255, 241 / 255, 209 / 255)
+    p_blizzard.header:SetText(L["Skins"])
+    p_blizzard.sub:SetFont(UNIT_NAME_FONT, 12)
+    p_blizzard.sub:SetTextColor(181 / 255, 160 / 255, 128 / 255)
+    p_blizzard.sub:SetText(L["Adjust Skin settings."])
 
     addOption(p, MAINMENU_BUTTON, nil, "MAINMENU_SKIN_ENABLED")
     addOption(p, "Static Popup", nil, "STATICPOPUP_SKIN_ENABLED")
@@ -38,6 +44,32 @@ local function LoadSkinsPanel(sWindow)
     addOption(p, HELP_FRAME_TITLE, nil, "HELPFRAME_SKIN_ENABLED")
     addOption(p, GUILD_AND_COMMUNITIES, nil, "COMMUNITIES_SKIN_ENABLED")
 
-    InitPanel(p)
+    createCat(L["Skins"], L["Adjust Skin settings."], p, 6)
+
+    addOption(p_blizzard, MAINMENU_BUTTON, nil, "MAINMENU_SKIN_ENABLED")
+    addOption(p_blizzard, L["Popup notifications"], nil, "STATICPOPUP_SKIN_ENABLED")
+    addOption(p_blizzard, SHOW_BATTLENET_TOASTS, nil, "BNTOASTFRAME_SKIN_ENABLED")
+    addOption(p_blizzard, DEATH_RECAP_TITLE, nil, "DEATHRECAPFRAME_SKIN_ENABLED")
+    addOption(p_blizzard, "Drop-Down", nil, "DROPDOWN_SKIN_ENABLED")
+    addOption(p_blizzard, L["Looking for Group notifications"] , nil, "LFG_FRAMES_SKIN_ENABLED")
+    addOption(p_blizzard, READY_CHECK, nil, "READYCHECK_SKIN_ENABLED")
+    addOption(p_blizzard, L["Talking Head"], nil, "TALKINGHEAD_SKIN_ENABLED")
+    addOption(p_blizzard, L["Misc Frames"], nil, "MISC_SKIN_ENABLED")
+    addOption(p_blizzard, FLIGHT_MAP, nil, "FLIGHTMAP_SKIN_ENABLED")
+    addOption(p_blizzard, L["Blizzard Class Colors"], nil, "BLIZZARDCLASSCOLOR_ENABLED")
+    addOption(p_blizzard, ADDON_LIST, nil, "ADDONLIST_SKIN_ENABLED")
+    addOption(p_blizzard, INTERFACE_OPTIONS, nil, "BLIZZARD_OPTIONS_SKIN_ENABLED")
+    addOption(p_blizzard, KEY_BINDINGS, nil, "BINDINGS_SKIN_ENABLED")
+    addOption(p_blizzard, MACRO, nil, "MACRO_SKIN_ENABLED")
+    addOption(p_blizzard, MINIMAP_TRACKING_MAILBOX, nil, "MAIL_SKIN_ENABLED")
+    addOption(p_blizzard, BARBERSHOP, nil, "BARBERSHOP_SKIN_ENABLED")
+    addOption(p_blizzard, INSPECT, nil, "INSPECTION_SKIN_ENABLED")
+    addOption(p_blizzard, DRESSUP_FRAME, nil, "DRESSUP_SKIN_ENABLED")
+    addOption(p_blizzard, HELP_FRAME_TITLE, nil, "HELPFRAME_SKIN_ENABLED")
+    addOption(p_addons, "World Quest Tracker", nil, "SKIN_WQT_ENABLED", nil, nil, {["QUESTTRACKER_ENABLED"] = true})
+    addOption(p_addons, "Immersion", nil, "IMMERSIONADDON_SKIN_ENABLED")
+
+    InitPanel(p_blizzard)
+    InitPanel(p_addons)
 end
 GW.LoadSkinsPanel = LoadSkinsPanel
